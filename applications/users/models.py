@@ -59,6 +59,12 @@ class User(AbstractBaseUser, PermissionsMixin):
         default=False
     )
 
+    avatar = models.ImageField(
+        verbose_name='Avatar',
+        upload_to='users',
+        null=True
+    )
+
     historical = HistoricalRecords()
 
     objects = UserManager()
@@ -72,7 +78,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     
     def get_full_name(self):
         """ Obtener nombre completo """
-        return '{0} {1} {2}'.format( self.first_name, self.last_name, self.last_name2 )
+        return '{0} {1}'.format( self.first_name, self.last_name )
     
     def get_short_name(self):
         """ Obtener nombre corto """

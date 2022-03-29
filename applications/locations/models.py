@@ -24,6 +24,12 @@ class Location(models.Model):
         null=False
     )
 
+    id_city = models.CharField(
+        verbose_name='Id Ciudad',
+        max_length=5,
+        blank=True
+    )
+
     city = models.CharField(
         verbose_name='Ciudad',
         max_length=50,
@@ -32,7 +38,7 @@ class Location(models.Model):
 
     id_region = models.CharField(
         verbose_name='Id Region',
-        max_length=5
+        max_length=2
     )
 
     region = models.CharField(
@@ -52,6 +58,13 @@ class Location(models.Model):
     #     related_name='manager_location'
     # )
 
+    image = models.ImageField(
+        verbose_name='Imágen',
+        upload_to='locations',
+        blank=True,
+        null=True
+    )
+
     created_at = models.DateTimeField(
         null=False,
         default=datetime.datetime.today()
@@ -66,6 +79,7 @@ class Location(models.Model):
     )
 
     updated_at = models.DateTimeField(
+        null=True,
         blank=True
     )
 
