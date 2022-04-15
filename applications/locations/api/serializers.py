@@ -1,4 +1,3 @@
-from dataclasses import field
 from rest_framework import serializers
 
 from applications.locations.models import Location, Pool
@@ -34,12 +33,14 @@ class CreateLocationSerializer(serializers.ModelSerializer):
             'region',
             'phone',
             'image',
-            'pools'
+            'pools',
+            'created_by',
+            'created_at'
         ]
 
-class GetAllLocationsSerializer(serializers.ModelSerializer):
+class GetLocationSerializer(serializers.ModelSerializer):
 
-    pools = CreatePoolSerializer(read_only=True, many=True)
+    # pools = CreatePoolSerializer(read_only=True, many=True)
     full_address = serializers.SerializerMethodField()
 
     class Meta:
@@ -55,8 +56,60 @@ class GetAllLocationsSerializer(serializers.ModelSerializer):
             'phone',
             'image',
             'full_address',
-            'pools'
+            # 'pools',
         ]
     
     def get_full_address(self, location:Location):
         return location.get_address()
+
+class GetAllLocationsSerializer(serializers.ModelSerializer):
+
+    # pools = CreatePoolSerializer(read_only=True, many=True)
+    full_address = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Location
+        fields = [
+            'id',
+            'name',
+            'address',
+            'id_city',
+            'city',
+            'id_region',
+            'region',
+            'phone',
+            'image',
+            'full_address',
+            # 'pools',
+        ]
+    
+    def get_full_address(self, location:Location):
+        return location.get_address()
+
+class UpdateLocationSerializer(serializers.ModelSerializer):
+
+    pools = CreatePoolSerializer(read_only=True, many=True)
+
+    class Meta:
+        model = Location
+        fields = [
+            'id',
+            'name',
+            'address',
+            'id_city',
+            'city',
+            'id_region',
+            'region',
+            'phone',
+            'image',
+            'pools'
+        ]
+
+class GetLocationToSelectSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model  = Location
+        fields = [
+            'id',
+            'name'
+        ]

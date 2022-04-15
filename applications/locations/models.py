@@ -65,6 +65,11 @@ class Location(models.Model):
         null=True
     )
 
+    state = models.BooleanField(
+        verbose_name='Estado',
+        default=True
+    )
+
     created_at = models.DateTimeField(
         null=False,
         default=datetime.datetime.today()
@@ -89,6 +94,20 @@ class Location(models.Model):
         null=True,
         on_delete=models.SET_NULL,
     )
+    
+    canceled_at = models.DateTimeField(
+        null=True,
+        blank=True
+    )
+
+    canceled_by = models.ForeignKey(
+        User,
+        related_name='location_canceled_by',
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+    )
+
 
     class Meta:
         verbose_name = 'Sede'

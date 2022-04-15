@@ -8,7 +8,7 @@ from simple_history.models import HistoricalRecords
 class UserManager(BaseUserManager):
     """ Manager Usuarios DotSport """
 
-    def create_user(self, email, first_name, last_name, password=None):
+    def create_user(self, email, doc_num, first_name, last_name, password=None):
         """ Creacion nuevo usuario """
         if not email:
             raise ValueError('Usuario debe tener Email')
@@ -17,16 +17,16 @@ class UserManager(BaseUserManager):
         print(email)
         
         email = self.normalize_email(email)
-        user = self.model(email=email, first_name=first_name, last_name=last_name)
+        user = self.model(email=email, doc_num=doc_num, first_name=first_name, last_name=last_name)
 
         user.set_password(password)
         user.save(using=self._db)
 
         return user
     
-    def create_superuser(self, email, first_name, last_name, password):
+    def create_superuser(self, email, doc_num, first_name, last_name, password):
         """ Creacion super usuario """
-        user = self.create_user(email, first_name, last_name, password)
+        user = self.create_user(email, doc_num, first_name, last_name, password)
 
         user.is_superuser = True
         user.is_staff = True
@@ -41,6 +41,13 @@ class User(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(
         max_length=255, 
         unique=True
+    )
+    
+    doc_num = models.CharField(
+        verbose_name='N° Documento',
+        max_length=10,
+        unique=True,
+        null=True
     )
 
     first_name = models.CharField(
@@ -61,6 +68,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     avatar = models.ImageField(
         verbose_name='Avatar',
+        blank=True,
         upload_to='users',
         null=True
     )
@@ -70,7 +78,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     objects = UserManager()
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['first_name','last_name']
+    REQUIRED_FIELDS = ['doc_num','first_name','last_name']
 
     class Meta:
         verbose_name = 'Usuario'

@@ -93,14 +93,29 @@ class Employee(models.Model):
     )
 
     updated_at = models.DateTimeField(
-        null=True
+        null=True,
+        blank=True
     )
 
     updated_by = models.ForeignKey(
         User,
+        blank=True,
         null=True,
         on_delete=models.SET_NULL,
         related_name='employee_updated_by'
+    )
+
+    canceled_at = models.DateTimeField(
+        null=True,
+        blank=True
+    )
+
+    canceled_by = models.ForeignKey(
+        User,
+        related_name='employee_canceled_by',
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
     )
 
     class Meta:
@@ -108,7 +123,7 @@ class Employee(models.Model):
         verbose_name_plural = 'Empleados'
 
     def __str__(self):
-        return '{0} - {1}'.format(self.id_employee,self.get_full_name())
+        return '{0} - {1}'.format(self.id,self.get_full_name())
 
     def get_full_name(self):
         return '{0}, {1}'.format( self.last_name, self.first_name )

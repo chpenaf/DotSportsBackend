@@ -91,6 +91,19 @@ class Member(models.Model):
         related_name='member_updated_by'
     )
 
+    canceled_at = models.DateTimeField(
+        blank=True,
+        null=True
+    )
+
+    canceled_by = models.ForeignKey(
+        User,
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name='member_canceled_by'
+    )
+
     class Meta:
         verbose_name = 'Miembro'
         verbose_name_plural = 'Miembros'
@@ -101,11 +114,11 @@ class Member(models.Model):
 
     def get_short_name(self):
         """ Obtiene nombre completo del miembre """
-        return '{0}, {1}'.format(self.first_name, self.last_name)
+        return '{0} {1}'.format(self.first_name, self.last_name)
 
-    def get_age(self, today=None):
+    def get_age(self, today=None) -> str:
         """ Obtiene edad del miembro """
         if today is None:
             today = datetime.date.today()
-        
-        return relativedelta( today, self.date_of_birth )
+
+        return relativedelta( today, self.date_of_birth ).years

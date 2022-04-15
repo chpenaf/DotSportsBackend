@@ -18,7 +18,6 @@ from rest_framework.response import Response
 
 from applications.utils import Util
 from applications.users.models import User
-from applications.members.models import Member
 from .serializers import (
     CheckDocumentNumberExistsSerializer,
     CheckEmailExistsSerializer,
@@ -33,7 +32,7 @@ class CheckDocumentNumberExists(generics.GenericAPIView):
 
         doc_num = request.data.get('doc_num', '')
 
-        if Member.objects.filter(doc_num=doc_num).exists():
+        if User.objects.filter(doc_num=doc_num).exists():
             return Response({
                 'code': '0',
                 'message': 'Documento ingresado ya existe en sistema'

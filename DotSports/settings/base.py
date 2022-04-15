@@ -23,17 +23,20 @@ BASE_APPS = [
 
 THIRD_APPS = [
     'corsheaders',
+    'django_filters',
     'rest_framework',
     'rest_framework.authtoken',
     'simple_history',
 ]
 
 LOCAL_APPS = [
+    'applications.main.apps.MainConfig',
     'applications.authentication.apps.AuthenticationConfig',
     'applications.employees.apps.EmployeesConfig',
     'applications.locations.apps.LocationsConfig',
     'applications.members.apps.MembersConfig',
     'applications.users.apps.UsersConfig',
+    'applications.schedule.apps.ScheduleConfig'
 ]
 
 INSTALLED_APPS = BASE_APPS + THIRD_APPS + LOCAL_APPS
@@ -50,6 +53,7 @@ MIDDLEWARE = [
 ]
 
 REST_FRAMEWORK = {
+    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 10,
     'DEFAULT_AUTHENTICATION_CLASSES': (
