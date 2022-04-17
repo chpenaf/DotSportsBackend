@@ -1,5 +1,4 @@
 from urllib.request import Request
-from xmlrpc.client import DateTime
 from rest_framework import serializers
 
 from ...locations.models import Location
@@ -124,12 +123,10 @@ class CreateScheduleDaySerializer(serializers.ModelSerializer):
             is_open=validated_data['is_open']
         )
         day.save()
-        return {
-            'id':day.id,
-            'schedule':day.schedule,
-            'daytype':day.daytype,
-            'is_open':day.is_open
-        }
+        serializer = ScheduleDaySerializer2(
+            instance=day
+        )
+        return serializer.data
 
 class CreateSlotSerializer(serializers.ModelSerializer):
 
@@ -152,3 +149,14 @@ class CreateSlotSerializer(serializers.ModelSerializer):
         )
         slot.save()
         return validated_data
+
+class ScheduleDaySerializer2(serializers.ModelSerializer):
+
+    class Meta:
+        model = Schedule_Day
+        fields = [
+            'id',
+            'schedule',
+            'daytype',
+            'is_open'
+        ]

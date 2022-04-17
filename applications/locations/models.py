@@ -136,10 +136,9 @@ class Pool(models.Model):
         unique=True
     )
 
-    id_location = models.ForeignKey(
+    location = models.ForeignKey(
         Location,
         verbose_name='Sedes',
-        related_name='pools',
         on_delete=models.CASCADE
     )
 
@@ -196,7 +195,8 @@ class Pool(models.Model):
     )
 
     updated_at = models.DateTimeField(
-        null=True
+        null=True,
+        blank=True
     )
 
     updated_by = models.ForeignKey(
@@ -213,7 +213,7 @@ class Pool(models.Model):
 
     def __str__(self):
 
-        return '{0} - {1}'.format( self.id_location.name, self.name )
+        return '{0} - {1}'.format( self.location.name, self.name )
     
 
 class Lane(models.Model):

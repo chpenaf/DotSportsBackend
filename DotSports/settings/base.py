@@ -35,6 +35,7 @@ LOCAL_APPS = [
     'applications.employees.apps.EmployeesConfig',
     'applications.locations.apps.LocationsConfig',
     'applications.members.apps.MembersConfig',
+    'applications.planning.apps.PlanningConfig',
     'applications.users.apps.UsersConfig',
     'applications.schedule.apps.ScheduleConfig'
 ]
