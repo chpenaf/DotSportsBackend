@@ -143,8 +143,6 @@ class PoolView(APIView):
         data: list = request.data
         pools = list()
 
-        print(data)
-
         for item in data:
 
             location: Location = Location.objects.all().filter( 

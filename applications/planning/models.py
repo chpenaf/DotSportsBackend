@@ -133,3 +133,35 @@ class Calendar(models.Model):
     
     def get_date(self):
         return datetime(self.year,self.month,self.day).date()
+
+
+class Slot(models.Model):
+
+    calendar = models.ForeignKey(
+        Calendar,
+        on_delete=models.CASCADE
+    )
+    
+    slot = models.IntegerField(
+        verbose_name='Slot'
+    )
+
+    starttime = models.TimeField(
+        verbose_name='Inicio'
+    )
+
+    endtime = models.TimeField(
+        verbose_name='Fin'
+    )
+
+    class Meta:
+        verbose_name='Slot'
+        verbose_name_plural='Slots'
+
+    def __str__(self):
+        return '{0}: {1} Slot {2} - {3}'.format(
+            self.calendar.location.name,
+            self.calendar,
+            self.starttime,
+            self.endtime
+        )

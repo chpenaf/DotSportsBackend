@@ -9,24 +9,11 @@ from rest_framework.views import APIView
 
 from applications.main.services import generate_request
 from applications.locations.models import Location
-from applications.schedule.models import Schedule, Schedule_Day
+from applications.schedule.models import Schedule, Schedule_Day, Schedule_Slot
 
-from ..models import Calendar
-from .serializers import CalendarSerializer
+from ..models import Calendar, Slot
+from .serializers import CalendarSerializer, SlotSerializer
 
-class HolidayType:
-    nombre: Optional[str]
-    comentarios: Optional[str]
-    fecha: Optional[str]
-    irrenunciable: Optional[str]
-    tipo: Optional[str]
-
-    def __init__(self, nombre, comentarios, fecha, irrenunciable, tipo):
-        self.nombre = nombre
-        self.comentarios = comentarios
-        self.fecha = fecha
-        self.irrenunciable = irrenunciable
-        self.tipo = tipo
 
 class CalendarView(APIView):
 
@@ -76,6 +63,10 @@ class CalendarView(APIView):
                 }, status=status.HTTP_400_BAD_REQUEST
             )
 
+        return self.fill_calendar(location, begin_date=begin_date, end_date=end_date)
+
+    def fill_calendar(self, location: Location, begin_date, end_date) -> Response:
+
         start = datetime.strptime(begin_date,'%Y-%m-%d')
         end = datetime.strptime(end_date,'%Y-%m-%d')
         delta = timedelta(days=1)
@@ -85,12 +76,6 @@ class CalendarView(APIView):
         calendar_all: Calendar = Calendar.objects.all().filter(
             location  = location
         )
-
-        schedule: Schedule = Schedule.objects.all().filter(
-            location = location,
-            begin_validity__lte = start,
-            end_validity__gte = end,
-        ).first()
 
         calendar_insert = list()
 
@@ -102,7 +87,13 @@ class CalendarView(APIView):
                 if db_date == cur_date:
                     calendar_insert.append(item)
                     start += delta
-                    continue            
+                    continue
+
+            schedule: Schedule = Schedule.objects.all().filter(
+                location = location,
+                begin_validity__lte = start,
+                end_validity__gte = start,
+            ).first()
 
             day_week = start.weekday() + 1
             day_type = Schedule_Day.WEEKDAY
@@ -140,14 +131,31 @@ class CalendarView(APIView):
 
             calendar_insert.append(calendar)
 
+            if schedule:
+                schedule_day: Schedule_Day = Schedule_Day.objects.all().filter(
+                    schedule = schedule,
+                    daytype = day_type
+                ).first()
+                if schedule_day:
+                    schedule_slots: list = Schedule_Slot.objects.all().filter(
+                        schedule_day=schedule_day
+                    )
+
+                    for item in schedule_slots:
+                        slot: Slot = Slot.objects.create(
+                            calendar = calendar,
+                            slot = item.slot,
+                            starttime = item.starttime,
+                            endtime = item.endtime
+                        )
+                        slot.save()
+
             start += delta
 
         serializer = self.serializer_class(
             calendar_insert,
             many=True
         )
-
-        print(serializer.data)
 
         return Response(
             serializer.data,
@@ -182,9 +190,48 @@ class CalendarView(APIView):
             holidays_list.append(holiday)
 
         return holidays_list
+
+class SlotView(APIView):
+
+    def get(self, request: Request, id_location:int=None, year:int=None, month:int=None, day:int=None):
         
-    
-    
+        if id_location:
+            location: Location = Location.objects.all().filter( id = id_location ).first()
+        else:
+            return Response(
+                {
+                    'ok':True,
+                    'message':'Date'
+                }, status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        if year and month and day:
+            date = datetime(year,month,day)
+        else:
+            date = datetime.today().date()
 
+        calendar: Calendar = Calendar.objects.all().filter(
+            location=location,
+            date=date
+        ).first()
 
+        if date == datetime.now().date():
+            slots = Slot.objects.all().filter(
+                    calendar=calendar,
+                    starttime__gte=datetime.now().time()
+                )
 
+        else:
+            slots = Slot.objects.all().filter(
+                        calendar=calendar
+                    )
+
+        serializer = SlotSerializer(
+            slots,
+            many=True
+        )
+
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )

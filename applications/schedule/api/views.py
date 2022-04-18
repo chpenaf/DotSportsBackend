@@ -1,4 +1,3 @@
-import json, os
 from datetime import datetime
 
 from django.db.models import QuerySet
@@ -15,7 +14,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from applications.locations.models import Location
-
+from applications.planning.models import Calendar
 from ..models import (
     Schedule,
     Schedule_Day,
@@ -200,8 +199,6 @@ class ScheduleView(APIView):
 
     def post(self, request:Request) -> Response:
 
-        print('REQUEST', request.data)
-
         data = request.data
 
         # Location
@@ -339,6 +336,8 @@ class ScheduleView(APIView):
                     )
                     slot.save()
                     index_slot += 1
+        
+        Calendar.fill_calendar(location,begin_validity,end_validity)
 
         return Response({
             'ok':True
