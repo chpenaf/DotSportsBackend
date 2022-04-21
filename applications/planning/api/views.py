@@ -1,5 +1,4 @@
-from datetime import datetime, timedelta, date
-from typing import Optional
+from datetime import datetime, timedelta
 
 from rest_framework import status
 from rest_framework.permissions import IsAdminUser
@@ -215,7 +214,7 @@ class SlotView(APIView):
             date=date
         ).first()
 
-        if date == datetime.now().date():
+        if date.date() == datetime.now().date():
             slots = Slot.objects.all().filter(
                     calendar=calendar,
                     starttime__gte=datetime.now().time()

@@ -32,12 +32,14 @@ THIRD_APPS = [
 LOCAL_APPS = [
     'applications.main.apps.MainConfig',
     'applications.authentication.apps.AuthenticationConfig',
+    'applications.catalog.apps.CatalogConfig',
+    'applications.credits.apps.CreditsConfig',
     'applications.employees.apps.EmployeesConfig',
     'applications.locations.apps.LocationsConfig',
     'applications.members.apps.MembersConfig',
     'applications.planning.apps.PlanningConfig',
+    'applications.schedule.apps.ScheduleConfig',
     'applications.users.apps.UsersConfig',
-    'applications.schedule.apps.ScheduleConfig'
 ]
 
 INSTALLED_APPS = BASE_APPS + THIRD_APPS + LOCAL_APPS
