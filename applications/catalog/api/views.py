@@ -11,13 +11,15 @@ from ..models import (
     Service,
     Catalog,
     Course,
-    Course_Level
+    Course_Level,
+    Service_Subcategory
 )
 from .serializers import (
     ServiceSerializer,
     CourseSerializer,
     CourseLevelSerializer,
-    CatalogSerializer
+    CatalogSerializer,
+    ServiceSubcategorySerializer
 )
 
 class ServiceView(APIView):
@@ -115,6 +117,46 @@ class ServiceView(APIView):
                 {
                     'ok':False,
                     'message':'Service not found'
+                }, status=status.HTTP_404_NOT_FOUND
+            )
+
+class SubcategoryView(APIView):
+
+    serializer_class = ServiceSubcategorySerializer
+
+    def get_queryset(self, pk=None) -> QuerySet:
+        if pk:
+            return Service_Subcategory.objects.all().filter(
+                id = pk 
+            ).first()
+        else:
+            return Service_Subcategory.objects.all()
+
+    def post(self, request):
+        pass
+
+    def get(self, request, pk=None):
+        pass
+
+    def put(self, request, pk=None):
+        pass
+
+    def delete(self, request, pk=None) -> Response:
+        subcategory: Service_Subcategory = self.get_queryset( pk )
+        if subcategory:
+            subcategory.delete()
+            return Response(
+                {
+                    'ok':True,
+                    'message':'Subcategory delete'
+                }, status=status.HTTP_200_OK
+            )
+        
+        else:
+            return Response(
+                {
+                    'ok':False,
+                    'message':'Subcategory not found'
                 }, status=status.HTTP_404_NOT_FOUND
             )
 

@@ -34,6 +34,7 @@ LOCAL_APPS = [
     'applications.authentication.apps.AuthenticationConfig',
     'applications.catalog.apps.CatalogConfig',
     'applications.credits.apps.CreditsConfig',
+    'applications.courses.apps.CoursesConfig',
     'applications.employees.apps.EmployeesConfig',
     'applications.locations.apps.LocationsConfig',
     'applications.members.apps.MembersConfig',
