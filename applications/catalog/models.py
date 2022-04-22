@@ -85,11 +85,10 @@ class Course_Level(models.Model):
 
 class Catalog(models.Model):
     
-    location = models.ForeignKey(
+    location = models.OneToOneField(
         Location,
         on_delete=models.CASCADE,
-        verbose_name='Sede',
-        unique=True
+        verbose_name='Sede'
     )
 
     services = models.ManyToManyField(

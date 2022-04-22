@@ -1,12 +1,11 @@
-from datetime import datetime
-
 from django.db import models
 
 from applications.catalog.models import Course, Course_Level
 from applications.locations.models import Location, Pool, Lane
-from applications.planning.models import Calendar
+from applications.schedule.models import Schedule_Slot
+from applications.planning.models import Calendar, Slot
 
-class CourseAsigned(models.Model):
+class CourseAssigned(models.Model):
 
     location = models.ForeignKey(
         Location,
@@ -39,14 +38,8 @@ class CourseAsigned(models.Model):
         null=True
     )
 
-    startdate = models.DateField(
-        verbose_name='Inicio',
-        default=datetime.today().date()
-    )
-
-    enddate = models.DateField(
-        verbose_name='Fin',
-        default=datetime.today().date()
+    num_sessions = models.IntegerField(
+        verbose_name='Cantidad de sesiones'
     )
 
     teacher = models.CharField(
@@ -55,6 +48,15 @@ class CourseAsigned(models.Model):
         blank=True,
         null=True
     )
+
+    startdate = models.DateField(
+        verbose_name='Inicio'
+    )
+
+    enddate = models.DateField(
+        verbose_name='Fin'
+    )
+
 
     class Meta:
         verbose_name = 'Curso'
@@ -68,23 +70,40 @@ class CourseAsigned(models.Model):
         )
 
 class CourseSchedule(models.Model):
+
+    MONDAY    = 1
+    TUESDAY   = 2
+    WEDNESDAY = 3
+    THURSDAY  = 4
+    FRIDAY    = 5
+    SATURDAY  = 6
+    SUNDAY    = 7
+
+    WEEKDAYS_CHOICES = [
+        ( MONDAY, 'Lunes' ),
+        ( TUESDAY, 'Martes' ),
+        ( WEDNESDAY, 'Miércoles' ),
+        ( THURSDAY, 'Jueves' ),
+        ( FRIDAY, 'Viernes' ),
+        ( SATURDAY, 'Sábado' ),
+        ( SUNDAY, 'Domingo')
+    ]
     
-    course_asigned = models.ForeignKey(
-        CourseAsigned,
+    course_assigned = models.ForeignKey(
+        CourseAssigned,
         on_delete=models.CASCADE
     )
 
     weekday = models.IntegerField(
         verbose_name='Día de la semana',
-        default=datetime.today().weekday
+        choices=WEEKDAYS_CHOICES,
+        default=MONDAY
     )
 
-    starttime = models.TimeField(
-        verbose_name='Hora inicio'
-    )
-
-    endtime = models.TimeField(
-        verbose_name='Hora inicio'
+    slot = models.ForeignKey(
+        Schedule_Slot,
+        on_delete=models.DO_NOTHING,
+        verbose_name='Bloque horario (plan)'
     )
 
     class Meta:
@@ -92,18 +111,21 @@ class CourseSchedule(models.Model):
         verbose_name_plural = 'Horarios Cursos'
 
     def __str__(self):
-        return '{0} - {1} : {2} ( {3} - {4} )'.format(
-            self.course_asigned.course.name,
-            self.course_asigned.level.name,
-            self.weekday,
-            self.starttime,
-            self.endtime
+        return 'Curso {0} - {1}: {2}'.format(
+            self.course_assigned.course.name,
+            self.course_assigned.level.name,
+            self.WEEKDAYS_CHOICES[self.weekday - 1][1]
         )
 
 class CourseSession(models.Model):
 
-    course_asigned = models.ForeignKey(
-        CourseAsigned,
+    course_assigned = models.ForeignKey(
+        CourseAssigned,
+        on_delete=models.CASCADE
+    )
+
+    course_schedule = models.ForeignKey(
+        CourseSchedule,
         on_delete=models.CASCADE
     )
 
@@ -113,12 +135,10 @@ class CourseSession(models.Model):
         on_delete=models.CASCADE
     )
 
-    starttime = models.TimeField(
-        verbose_name='Hora inicio'
-    )
-
-    endtime = models.TimeField(
-        verbose_name='Hora inicio'
+    slot = models.ForeignKey(
+        Slot,
+        verbose_name='Bloque horario',
+        on_delete=models.DO_NOTHING
     )
 
     class Meta:
@@ -127,9 +147,9 @@ class CourseSession(models.Model):
     
     def __str__(self):
         return '{0} - {1}: {2} ( {3} - {4} )'.format(
-            self.course_asigned.course.name,
-            self.course_asigned.level.name,
+            self.course_assigned.course.name,
+            self.course_assigned.level.name,
             self.date,
-            self.starttime,
-            self.endtime
+            self.slot.starttime,
+            self.slot.endtime
         )

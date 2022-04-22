@@ -71,6 +71,16 @@ class Schedule_Day(models.Model):
 
     def __str__(self):
         return '{0} - {1}'.format(self.schedule, self.daytype)
+    
+    def get_daytype(self,weekday: int):
+
+        if weekday >= 1 and weekday <= 5:
+            return self.WEEKDAY
+        elif weekday == 6:
+            return self.SATURDAY
+        elif weekday == 7:
+            return self.SUNDAY
+
 
 class Schedule_Slot(models.Model):
 

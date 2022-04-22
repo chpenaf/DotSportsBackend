@@ -1,6 +1,3 @@
-from datetime import datetime
-from dateutil.relativedelta import relativedelta
-
 from django.db import models
 
 from applications.employees.models import Employee
@@ -43,13 +40,11 @@ class Credit_Header(models.Model):
     )
 
     begin_validity = models.DateField(
-        verbose_name = 'Inicio validez',
-        default = datetime.now().date()
+        verbose_name = 'Inicio validez'
     )
 
     end_validity = models.DateField(
-        verbose_name = 'Fin validez',
-        default = ( datetime.today() + relativedelta( months = +1 ) ).date()
+        verbose_name = 'Fin validez'
     )
 
     entered_by = models.ForeignKey(
@@ -93,13 +88,11 @@ class Credit_Pos(models.Model):
     )
 
     begin_validity = models.DateField(
-        verbose_name = 'Inicio validez',
-        default = datetime.now().date()
+        verbose_name = 'Inicio validez'
     )
 
     end_validity = models.DateField(
-        verbose_name = 'Fin validez',
-        default = ( datetime.today() + relativedelta( months = +1 ) )
+        verbose_name = 'Fin validez'
     )
 
     status = models.CharField(
