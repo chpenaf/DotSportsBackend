@@ -3,7 +3,7 @@ from datetime import datetime
 from rest_framework import serializers
 from rest_framework.request import Request
 
-from applications.locations.models import Location, Pool
+from applications.locations.models import Lane, Location, Pool
 
 class CreatePoolSerializer(serializers.ModelSerializer):
 
@@ -110,11 +110,58 @@ class UpdateLocationSerializer(serializers.ModelSerializer):
 
 class GetLocationToSelectSerializer(serializers.ModelSerializer):
 
+    pools = serializers.SerializerMethodField(required=False)
+
     class Meta:
         model  = Location
         fields = [
             'id',
-            'name'
+            'name',
+            'pools'
+        ]
+    
+    def get_pools(self, instance: Location):
+
+        pools = Pool.objects.all().filter(
+            location = instance
+        )
+
+        serializer = PoolSerializerToSelect(
+            pools,
+            many=True
+        )
+
+        return serializer.data
+
+class PoolSerializerToSelect(serializers.ModelSerializer):
+
+    lanes = serializers.SerializerMethodField(required=False)
+
+    class Meta:
+        model  = Pool
+        fields = [
+            'id',
+            'name',
+            'lanes'
+        ]
+    
+    def get_lanes(self, instance):
+        lanes = Lane.objects.all().filter(
+            id_pool = instance
+        )
+        serializer = LaneSerializer(
+            lanes,
+            many=True
+        )
+        return serializer.data
+
+class LaneSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model  = Lane
+        fields = [
+            'id',
+            'lane_no'
         ]
 
 class PoolSerializer(serializers.ModelSerializer):

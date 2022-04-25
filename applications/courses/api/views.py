@@ -1,8 +1,10 @@
 from datetime import timedelta
+import json
 
 from django.db.models import QuerySet
 
 from rest_framework import status
+from rest_framework.decorators import api_view
 from rest_framework.permissions import IsAdminUser
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -10,6 +12,13 @@ from rest_framework.views import APIView
 
 from applications.locations.models import Location
 from applications.planning.models import Calendar, Slot
+from applications.schedule.models import (
+    Schedule, 
+    Schedule_Day, 
+    Schedule_Slot
+)
+
+from applications.schedule.api.serializers import ScheduleSlotSerializer
 
 from ..models import (
     CourseAssigned,
@@ -38,7 +47,7 @@ class CourseAssignedView(APIView):
             ).first()
             return CourseAssigned.objects.all().filter(
                 location = location
-            ).first()
+            )
         else:
             return CourseAssigned.objects.all()
 
@@ -69,7 +78,7 @@ class CourseAssignedView(APIView):
             many = True
         
         if id_location:
-            many = False
+            many = True
         
         serializer = self.serializer_class(
             self.get_queryset(pk,id_location),
@@ -119,15 +128,14 @@ class CourseScheduleView(APIView):
             )
     
     def get(self, request: Request, pk=None) -> Response:
-        
-        many = False
-        
-        if not pk:
-            many = True
-        
+
         serializer = self.serializer_class(
-            self.get_queryset(pk),
-            many=many
+            CourseSchedule.objects.all().filter(
+                course_assigned = CourseAssigned.objects.all().filter(
+                    id = pk
+                ).first()
+            ),
+            many=True
         )
 
         return Response(
@@ -228,5 +236,50 @@ class CourseSessionView(APIView):
 
         return Response(
             serializer.data,
+            status.HTTP_200_OK
+        )
+
+
+@api_view(['GET'])
+def get_schedule_week(request: Request, pk: int = None) -> Response:
+
+    if request.method == 'GET':
+
+        course: CourseAssigned = CourseAssigned.objects.all().filter(
+            id = pk
+        ).first()
+
+        if not course:
+            return Response(
+                {
+                    'ok': False,
+                    'message': 'Course not found'
+                }, status=status.HTTP_404_NOT_FOUND
+            )
+
+        schedule: Schedule = Schedule.objects.all().filter(
+            location = course.location
+        ).first()
+
+        if not schedule:
+            return Response(
+                {
+                    'ok': False,
+                    'message': 'Schedule not found'
+                }, status=status.HTTP_404_NOT_FOUND
+            )
+
+        serializer = ScheduleSlotSerializer(
+            Schedule_Slot.objects.all().filter(
+                schedule_day__in = Schedule_Day.objects.all().filter(
+                    schedule = schedule,
+                    daytype__in = ['WD','SA']
+                )
+            ),
+            many=True
+        )
+
+        return Response(
+            serializer.data, 
             status.HTTP_200_OK
         )

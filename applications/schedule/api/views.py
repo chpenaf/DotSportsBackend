@@ -23,6 +23,7 @@ from ..models import (
 from .serializers import (
     ListScheduleSerializer,
     ScheduleSerializer,
+    ScheduleDaySerializer,
     ScheduleDaySerializer2,
     CreateScheduleDaySerializer,
     CreateSlotSerializer,
@@ -165,6 +166,35 @@ class ScheduleDayApiView(APIView):
                 serializer.errors,
                 status=status.HTTP_400_BAD_REQUEST
             )
+    
+    def get(self, request: Request, id_location: int = None ) -> Response:
+
+        if id_location:
+            location: Location = Location.objects.all().filter(
+                id = id_location
+            ).first()
+
+        if not location:
+            return Response(
+                {
+                'ok':False,
+                'message':'Location not found'
+                }, status.HTTP_404_NOT_FOUND
+            )
+
+        serializer = ScheduleDaySerializer(
+            Schedule_Day.objects.all().filter(
+                schedule = Schedule.objects.all().filter(
+                    location = location
+                ).first()
+            ),
+            many=True
+        )
+
+        return Response(
+            serializer.data,
+            status.HTTP_200_OK
+        )
 
 class ScheduleSlotApiView(APIView):
 

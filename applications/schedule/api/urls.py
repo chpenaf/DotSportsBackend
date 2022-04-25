@@ -17,5 +17,6 @@ urlpatterns = [
     path('save/', ScheduleView.as_view(), name='save-schedule'),
     path('save/<int:pk>/', ScheduleAPIView.as_view(), name='update-schedule'),
     path('day/', ScheduleDayApiView.as_view(), name='create-schedule-day'),
+    path('day/<int:id_location>/', ScheduleDayApiView.as_view(), name='schedule-day-location'),
     path('day/slots/', ScheduleSlotApiView.as_view(), name='create-schedule-slot'),
 ]

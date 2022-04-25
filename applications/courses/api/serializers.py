@@ -71,3 +71,12 @@ class CourseSessionSerializer(serializers.ModelSerializer):
             'date',
             'slot'
         ]
+
+
+class SlotSerializer(serializers.Serializer):
+
+    slot = serializers.TimeField()
+
+class WeekSerializer(serializers.Serializer):
+
+    slots = SlotSerializer()
