@@ -15,6 +15,7 @@ class ScheduleSlotSerializer(serializers.ModelSerializer):
     class Meta:
         model  = Schedule_Slot
         fields = [
+            'id',
             'slot',
             'starttime',
             'endtime'
@@ -140,7 +141,6 @@ class CreateSlotSerializer(serializers.ModelSerializer):
         ]
 
     def create(self, validated_data):
-        print(validated_data)
         slot: Schedule_Slot = Schedule_Slot.objects.create(
             schedule_day=validated_data['schedule_day'],
             slot=validated_data['slot'],
