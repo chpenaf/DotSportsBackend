@@ -54,7 +54,9 @@ class CourseAssigned(models.Model):
     )
 
     enddate = models.DateField(
-        verbose_name='Fin'
+        verbose_name='Fin',
+        blank=True,
+        null=True
     )
 
 

@@ -13,6 +13,7 @@ class CourseAssignedSerializer(serializers.ModelSerializer):
 
     schedule = serializers.SerializerMethodField(read_only=True)
     sessions = serializers.SerializerMethodField(read_only=True)
+    enddate  = serializers.DateField(read_only=True)
 
     class Meta:
         model  = CourseAssigned
