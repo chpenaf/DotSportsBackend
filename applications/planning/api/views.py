@@ -64,6 +64,24 @@ class CalendarView(APIView):
 
         return self.fill_calendar(location, begin_date=begin_date, end_date=end_date)
 
+    def get(self, request: Request, id_location: int = None, year: int = None, month: int = None) -> Response:
+        
+        calendar_month = Calendar.objects.all().filter(
+            location = Location.objects.all().filter( id = id_location ).first(),
+            year = year,
+            month = month
+        )
+
+        serializer = self.serializer_class(
+            calendar_month,
+            many=True
+        )
+
+        return Response(
+            serializer.data,
+            status.HTTP_200_OK
+        )
+        
     def fill_calendar(self, location: Location, begin_date, end_date) -> Response:
 
         start = datetime.strptime(begin_date,'%Y-%m-%d')

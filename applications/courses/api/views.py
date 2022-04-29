@@ -1,3 +1,4 @@
+from calendar import c
 from datetime import timedelta
 import json
 
@@ -162,6 +163,30 @@ class CourseScheduleView(APIView):
             serializer.data,
             status.HTTP_200_OK
         )
+
+    def delete(self, request: Request, pk=None):
+
+        course: CourseAssigned = CourseAssigned.objects.all().filter(
+            id = pk
+        ).first()
+
+        if course:
+
+            course.delete()
+            return Response(
+                {
+                    'ok':True,
+                    'message':'Course deleted'
+                }, status.HTTP_200_OK
+            )
+        
+        else:
+            return Response(
+                {
+                    'ok':False,
+                    'message':'Course not found'
+                }, status.HTTP_404_NOT_FOUND
+            )
 
     def build_course_sessions(self, data: list):
         id_course = data[0].get('course_assigned')
