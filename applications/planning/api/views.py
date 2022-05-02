@@ -210,7 +210,7 @@ class CalendarView(APIView):
 
 class SlotView(APIView):
 
-    def get(self, request: Request, id_location:int=None, year:int=None, month:int=None, day:int=None):
+    def get(self, request, id_location=None, year=None, month=None, day=None, all=None):
         
         if id_location:
             location: Location = Location.objects.all().filter( id = id_location ).first()
@@ -232,16 +232,22 @@ class SlotView(APIView):
             date=date
         ).first()
 
-        if date.date() == datetime.now().date():
-            slots = Slot.objects.all().filter(
-                    calendar=calendar,
-                    starttime__gte=datetime.now().time()
-                )
-
-        else:
+        if all == 1:
             slots = Slot.objects.all().filter(
                         calendar=calendar
                     )
+
+        else:
+            if date.date() == datetime.now().date():
+                slots = Slot.objects.all().filter(
+                        calendar=calendar,
+                        starttime__gte=datetime.now().time()
+                    )
+
+            else:
+                slots = Slot.objects.all().filter(
+                            calendar=calendar
+                        )
 
         serializer = SlotSerializer(
             slots,
