@@ -33,3 +33,7 @@ class SlotSerializer(serializers.ModelSerializer):
             'starttime',
             'endtime'
         ]
+
+class PlanningDaySerializer(serializers.Serializer):
+
+    pass

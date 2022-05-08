@@ -7,8 +7,17 @@ from rest_framework.request import Request
 from rest_framework.views import APIView
 
 from applications.main.services import generate_request
-from applications.locations.models import Location
-from applications.schedule.models import Schedule, Schedule_Day, Schedule_Slot
+from applications.courses.models import (
+    CourseAssigned, 
+    CourseSchedule, 
+    CourseSession
+)
+from applications.locations.models import Location, Pool
+from applications.schedule.models import (
+    Schedule, 
+    Schedule_Day, 
+    Schedule_Slot
+)
 
 from ..models import Calendar, Slot
 from .serializers import CalendarSerializer, SlotSerializer
@@ -258,3 +267,86 @@ class SlotView(APIView):
             serializer.data,
             status=status.HTTP_200_OK
         )
+
+class PlanningDayView(APIView):
+
+    def get(self, request, id_location=None, id_pool=None, year=None, month=None, day=None) -> Response:
+
+        location: Location = Location.objects.all().filter(
+            id = id_location
+        ).first()
+        
+        if not location:
+            return Response(
+                {
+                    'ok':False,
+                    'message':'Location not found'
+                }, status.HTTP_404_NOT_FOUND
+            )
+            
+        pool: Pool = Pool.objects.all().filter(
+            id = id_pool
+        ).first()
+        
+        if not pool:
+            return Response(
+                {
+                    'ok':False,
+                    'message':'Pool not found'
+                }, status.HTTP_404_NOT_FOUND
+            )
+            
+        if year and month and day:
+            date = datetime(year,month,day)
+        else:
+            date = datetime.today().date()
+
+        calendar: Calendar = Calendar.objects.all().filter(
+            location=location,
+            date=date
+        ).first()
+        
+        if not calendar:
+            return Response(
+                {
+                    'ok':False,
+                    'message':'Calendar not found'
+                }, status.HTTP_404_NOT_FOUND
+            )
+            
+        slots = Slot.objects.all().filter(
+                    calendar=calendar
+                )
+        
+        sessions = CourseSession.objects.all().filter(
+            
+        )
+        
+        
+        """
+        [
+            {
+                id_slot: 1000,
+                starttime: 08:00,
+                endtime: 08:45,
+                lanes: [
+                    {
+                        id: 1,
+                        course: {
+                            id: 1,
+                            name: Basico
+                        }
+                    },
+                    {
+                        id: 2,
+                        course: null
+                    }
+                ]
+            },
+            {
+                id_slot: 1001:
+                starttime: 09:00
+                endtime
+            }
+        ]
+        """
