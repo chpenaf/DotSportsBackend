@@ -1,6 +1,4 @@
-from calendar import c
-from datetime import timedelta
-import json
+from datetime import datetime, timedelta
 
 from django.db.models import QuerySet
 
@@ -239,10 +237,17 @@ class CourseSessionView(APIView):
     serializer_class = CourseSessionSerializer
     permission_classes = [ IsAdminUser ]
 
-    def get_queryset(self, pk=None) -> QuerySet:
+    def get_queryset(self, pk=None, year=None, month=None, day=None) -> QuerySet:
         
         if pk:
             return CourseSession.objects.all().filter( id = pk ).first()
+        elif year and month and day:
+            date = datetime(year, month, day)
+            return CourseSession.objects.all().filter(
+                date = Calendar.objects.all().filter(
+                    date = date
+                ).first()
+            )
         else:
             return CourseSession.objects.all()
 
@@ -267,15 +272,17 @@ class CourseSessionView(APIView):
                 status.HTTP_400_BAD_REQUEST
             )
     
-    def get(self, request: Request, pk=None) -> Response:
+    def get(self, request: Request, pk=None, year=None, month=None, day=None) -> Response:
         
         many = False
         
         if not pk:
             many = True
+        elif year and month and day:
+            many = True
         
         serializer = self.serializer_class(
-            self.get_queryset(pk),
+            self.get_queryset(pk, year, month, day),
             many=many
         )
 
