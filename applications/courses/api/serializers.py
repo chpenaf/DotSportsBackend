@@ -2,6 +2,9 @@ from rest_framework import serializers
 
 from applications.planning.models import Calendar, Slot
 from applications.schedule.models import Schedule_Day
+from applications.catalog.models import Course
+
+from applications.catalog.api.serializers import CourseSerializer
 
 from ..models import (
     CourseAssigned,
@@ -52,6 +55,24 @@ class CourseAssignedSerializer(serializers.ModelSerializer):
         )
         return serializer.data
 
+class CourseAssignedSerializer2(serializers.ModelSerializer):
+
+    course = CourseSerializer()
+
+    class Meta:
+        model  = CourseAssigned
+        fields = [
+            'id',
+            'location',
+            'pool',
+            'lane',
+            'course',
+            'level',
+            'num_sessions',
+            'teacher',
+            'startdate'
+        ]
+
 class CourseScheduleSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -65,13 +86,22 @@ class CourseScheduleSerializer(serializers.ModelSerializer):
 
 class CourseSessionSerializer(serializers.ModelSerializer):
 
+    course = serializers.SerializerMethodField(read_only=True)
+
     class Meta:
         model  = CourseSession
         fields = [
             'id',
             'date',
-            'slot'
+            'slot',
+            'course'
         ]
+    
+    def get_course(self, instance: CourseSession):
+        serializer = CourseAssignedSerializer2(
+            instance=instance.course_assigned
+        )
+        return serializer.data
 
 
 class SlotSerializer(serializers.Serializer):
