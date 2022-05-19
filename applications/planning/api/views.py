@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 
 from rest_framework import status
-from rest_framework.permissions import IsAdminUser
+from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.request import Request
 from rest_framework.views import APIView
@@ -12,7 +12,11 @@ from applications.courses.models import (
     CourseSchedule, 
     CourseSession
 )
-from applications.locations.models import Location, Pool
+from applications.locations.models import (
+    Lane, 
+    Location, 
+    Pool
+) 
 from applications.schedule.models import (
     Schedule, 
     Schedule_Day, 
@@ -20,7 +24,11 @@ from applications.schedule.models import (
 )
 
 from ..models import Calendar, Slot
-from .serializers import CalendarSerializer, SlotSerializer
+from .serializers import (
+    CalendarSerializer, 
+    PlanningDaySerializer,
+    SlotSerializer
+)
 
 
 class CalendarView(APIView):
@@ -270,6 +278,9 @@ class SlotView(APIView):
 
 class PlanningDayView(APIView):
 
+    serializer_class = PlanningDaySerializer
+    permission_classes = [ IsAuthenticated ]
+
     def get(self, request, id_location=None, id_pool=None, year=None, month=None, day=None) -> Response:
 
         location: Location = Location.objects.all().filter(
@@ -318,35 +329,13 @@ class PlanningDayView(APIView):
                     calendar=calendar
                 )
         
-        sessions = CourseSession.objects.all().filter(
-            
+        serializer = self.serializer_class(
+            instance=slots,
+            context={'pool':pool},
+            many=True
         )
         
-        
-        """
-        [
-            {
-                id_slot: 1000,
-                starttime: 08:00,
-                endtime: 08:45,
-                lanes: [
-                    {
-                        id: 1,
-                        course: {
-                            id: 1,
-                            name: Basico
-                        }
-                    },
-                    {
-                        id: 2,
-                        course: null
-                    }
-                ]
-            },
-            {
-                id_slot: 1001:
-                starttime: 09:00
-                endtime
-            }
-        ]
-        """
+        return Response(
+            serializer.data,
+            status.HTTP_200_OK
+        )

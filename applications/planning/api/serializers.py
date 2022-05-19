@@ -1,5 +1,7 @@
 from rest_framework import serializers
+from applications.courses.models import CourseAssigned, CourseSession
 
+from applications.locations.models import Pool, Lane
 from ..models import Calendar, Slot
 
 class CalendarSerializer(serializers.ModelSerializer):
@@ -34,6 +36,67 @@ class SlotSerializer(serializers.ModelSerializer):
             'endtime'
         ]
 
-class PlanningDaySerializer(serializers.Serializer):
+class PlanningLaneSerializer(serializers.ModelSerializer):
 
-    pass
+    desc = serializers.SerializerMethodField(read_only=True)
+
+    class Meta:
+        model  = Lane
+        fields = [
+            'id',
+            'lane_no',
+            'desc'
+        ]
+
+    def get_desc(self, instance: Lane):
+        slot: Slot = self.context.get('slot')
+
+        course_assigned: CourseAssigned = CourseAssigned.objects.filter(
+            lane=instance
+        ).first()
+
+        if course_assigned:
+
+            session: CourseSession = CourseSession.objects.filter(
+                course_assigned=course_assigned,
+                slot=slot
+            ).first()
+
+            if session:
+                return '{0} {1}'.format(
+                    session.course_assigned.course.name,
+                    session.course_assigned.level.name
+                )
+            else:
+                return 'Nado Libre'
+        
+        else:
+            return 'Nado Libre'
+
+
+class PlanningDaySerializer(serializers.ModelSerializer):
+
+    lanes = serializers.SerializerMethodField(read_only=True)
+
+    class Meta:
+        model  = Slot
+        fields = [
+            'id',
+            'calendar',
+            'slot',
+            'starttime',
+            'endtime',
+            'lanes'
+        ]
+    
+    def get_lanes(self, instance: Slot):
+
+        pool: Pool = self.context.get('pool')
+
+        serializer = PlanningLaneSerializer(
+            Lane.objects.all().filter( id_pool = pool ),
+            context={'slot': instance},
+            many=True
+        )
+
+        return serializer.data

@@ -86,7 +86,8 @@ class CourseScheduleSerializer(serializers.ModelSerializer):
 
 class CourseSessionSerializer(serializers.ModelSerializer):
 
-    course = serializers.SerializerMethodField(read_only=True)
+    lane = serializers.SerializerMethodField(read_only=True)
+    desc = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model  = CourseSession
@@ -94,14 +95,20 @@ class CourseSessionSerializer(serializers.ModelSerializer):
             'id',
             'date',
             'slot',
-            'course'
+            'lane',
+            'desc'
         ]
+
+    def get_lane(self, instance: CourseSession):
+
+        return instance.course_assigned.lane.lane_no
     
-    def get_course(self, instance: CourseSession):
-        serializer = CourseAssignedSerializer2(
-            instance=instance.course_assigned
+    def get_desc(self, instance: CourseSession):
+        
+        return '{0} {1}'.format(
+            instance.course_assigned.course.name,
+            instance.course_assigned.level.name
         )
-        return serializer.data
 
 
 class SlotSerializer(serializers.Serializer):
