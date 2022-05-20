@@ -2,8 +2,10 @@ from django.urls import path, include
 
 urlpatterns = [
     path('auth/', include('applications.authentication.api.urls') ),
+    path('booking/', include('applications.booking.api.urls') ),
     path('credits/', include('applications.credits.api.urls') ),
     path('catalog/', include('applications.catalog.api.urls') ),
+    path('config/', include('applications.config.api.urls') ),
     path('courses/', include('applications.courses.api.urls') ),
     path('employees/', include('applications.employees.api.urls') ),
     path('locations/', include('applications.locations.api.urls') ),

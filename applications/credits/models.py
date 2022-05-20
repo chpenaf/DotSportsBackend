@@ -9,12 +9,10 @@ class Credit_Header(models.Model):
 
     ACTIVE   = 'AC'
     FINISHED = 'FI'
-    CANCELED = 'CA'
 
     HEADER_STATUS_CHOICES = [
         ( ACTIVE, 'Activo' ),
         ( FINISHED, 'Finalizado' ),
-        ( CANCELED, 'Cancelado' )
     ]
 
     location = models.ForeignKey(
@@ -70,11 +68,14 @@ class Credit_Pos(models.Model):
     AVAILABLE = 'AV'
     RESERVED  = 'RE'
     COMPLETED = 'CO'
+    EXPIRED   = 'EX'
 
     CREDIT_STATUS_CHOICES = [
         ( AVAILABLE, 'Disponible' ),
         ( RESERVED, 'Reservado' ),
-        ( COMPLETED, 'Completado' )
+        ( COMPLETED, 'Completado' ),
+        ( EXPIRED, 'Expirado' )
+
     ]
 
     header = models.ForeignKey(

@@ -32,7 +32,9 @@ THIRD_APPS = [
 LOCAL_APPS = [
     'applications.main.apps.MainConfig',
     'applications.authentication.apps.AuthenticationConfig',
+    'applications.booking.apps.BookingConfig',
     'applications.catalog.apps.CatalogConfig',
+    'applications.config.apps.ConfigConfig',
     'applications.credits.apps.CreditsConfig',
     'applications.courses.apps.CoursesConfig',
     'applications.employees.apps.EmployeesConfig',

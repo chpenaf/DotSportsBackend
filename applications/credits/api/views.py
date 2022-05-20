@@ -91,6 +91,24 @@ class CreditView(APIView):
                 id = id_member
             ).first()
 
+            listCredits = Credit_Header.objects.all().filter( 
+                    member = member,
+                    status = Credit_Header.ACTIVE
+            )
+
+            for item in listCredits:
+                if item.end_validity < datetime.now().date():
+                    item.status = Credit_Header.FINISHED
+                    item.save()
+                    listPos = Credit_Pos.objects.all().filter(
+                        header = item,
+                        status = Credit_Pos.AVAILABLE
+                    )
+                    for pos in listPos:
+                        if pos.end_validity < datetime.now().date():
+                            pos.status = Credit_Pos.EXPIRED
+                            pos.save()
+
             serializer = self.serializer_class(
                 Credit_Header.objects.all().filter( 
                     member = member,
@@ -122,6 +140,26 @@ def get_quant_credits(request: Request, id_member: int) -> Response:
     result: int = 0
 
     if member:
+
+        listCredits = Credit_Header.objects.all().filter( 
+            member = member,
+            status = Credit_Header.ACTIVE
+        )
+
+        for item in listCredits:
+            if item.end_validity < datetime.now().date():
+                item.status = Credit_Header.FINISHED
+                item.save()
+                listPos = Credit_Pos.objects.all().filter(
+                    header = item,
+                    status = Credit_Pos.AVAILABLE
+                )
+                for pos in listPos:
+                    if pos.end_validity < datetime.now().date():
+                        pos.status = Credit_Pos.EXPIRED
+                        pos.save()
+
+
         headers_list: list = Credit_Header.objects.all().filter(
             member = member,
             status = Credit_Header.ACTIVE
