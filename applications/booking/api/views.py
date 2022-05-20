@@ -16,12 +16,27 @@ from applications.members.models import Member
 from applications.planning.models import Calendar, Slot
 
 from ..models import Booking
-from .serializers import BookingSerializer
+from .serializers import ( 
+    BookingSerializer,
+    BookingListSerializer
+)
 
 class BookingView(APIView):
 
     serializer_class = BookingSerializer
     permission_classes = [ IsAuthenticated ]
+
+    def get_queryset(self, pk: int = None, id_member: int = None) -> QuerySet:
+
+        if pk:
+            return Booking.objects.all().filter( id = pk ).first()
+        elif id_member:
+            return Booking.objects.all().filter(
+                member = Member.objects.all().filter( id = id_member ).first()
+            )
+        else:
+            return Booking.objects.all()
+    
 
     def post(self, request: Request) -> Response:
 
@@ -44,6 +59,14 @@ class BookingView(APIView):
                     {
                         'ok': False,
                         'message': 'No puede reservar en dias pasados'
+                    }, status.HTTP_400_BAD_REQUEST
+                )
+
+            if slot.starttime < datetime.now().time():
+                return Response( 
+                    {
+                        'ok': False,
+                        'message': 'No puede horas pasadas'
                     }, status.HTTP_400_BAD_REQUEST
                 )
 
@@ -165,3 +188,16 @@ class BookingView(APIView):
                 }, status.HTTP_400_BAD_REQUEST
             )
 
+    def get(self, request: Request, id_member: int = None) -> Response:
+
+        serializer = BookingListSerializer(
+            Booking.objects.all().filter(
+                    member = Member.objects.all().filter( id = id_member ).first()
+            ).order_by('id'),
+            many=True
+        )
+
+        return Response(
+            serializer.data,
+            status.HTTP_200_OK
+        )
