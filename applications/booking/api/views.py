@@ -37,7 +37,6 @@ class BookingView(APIView):
         else:
             return Booking.objects.all()
     
-
     def post(self, request: Request) -> Response:
 
         serializer = self.serializer_class(
@@ -62,7 +61,7 @@ class BookingView(APIView):
                     }, status.HTTP_400_BAD_REQUEST
                 )
 
-            if slot.starttime < datetime.now().time():
+            if slot.calendar.date == datetime.now().date() and slot.starttime < datetime.now().time():
                 return Response( 
                     {
                         'ok': False,
@@ -193,7 +192,7 @@ class BookingView(APIView):
         serializer = BookingListSerializer(
             Booking.objects.all().filter(
                     member = Member.objects.all().filter( id = id_member ).first()
-            ).order_by('id'),
+            ).order_by('calendar','slot'),
             many=True
         )
 
@@ -201,3 +200,37 @@ class BookingView(APIView):
             serializer.data,
             status.HTTP_200_OK
         )
+
+    def delete(self, request: Request, pk: int = None) -> Response:
+
+        booking: Booking = self.get_queryset(pk = pk)
+
+        if booking:
+
+            header: Credit_Header = booking.credit_header
+            if header.status == Credit_Header.FINISHED:
+                header.status = Credit_Header.ACTIVE
+                header.save()
+
+            pos: Credit_Pos = booking.credit_pos
+            pos.status = Credit_Pos.AVAILABLE
+            pos.used_at = None
+            pos.save()
+
+            booking.delete()
+
+            return Response(
+                {
+                   'ok': True,
+                   'message': 'Reserva eliminada correctamente'
+                }, status.HTTP_200_OK
+            )
+        
+        else:
+
+            return Response(
+                {
+                   'ok': False,
+                   'message': 'Error al eliminar reserva'
+                }, status.HTTP_400_BAD_REQUEST
+            )

@@ -10,7 +10,7 @@ from rest_framework.generics import (
     UpdateAPIView,
     DestroyAPIView
 )
-from rest_framework.permissions import IsAdminUser
+from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -124,7 +124,7 @@ class UpdateLocationView(UpdateAPIView):
             )
 
 class GetLocationToSelectView(ListAPIView):
-    permission_classes = [IsAdminUser]
+    permission_classes = [IsAuthenticated]
     serializer_class   = GetLocationToSelectSerializer
     queryset = Location.objects.all().filter(state = True)
 

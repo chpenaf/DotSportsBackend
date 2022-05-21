@@ -27,6 +27,7 @@ class BookingListSerializer(serializers.ModelSerializer):
     class Meta:
         model  = Booking
         fields = [
+            'id',
             'member',
             'calendar',
             'slot',
@@ -37,6 +38,19 @@ class BookingListSerializer(serializers.ModelSerializer):
             'old'
         ]
 
+    def to_representation(self, instance: Booking):
+        return {
+            'id': instance.id,
+            'member': instance.member.id,
+            'calendar': instance.calendar.id,
+            'slot': SlotSerializer(instance.slot).data,
+            'location': instance.location.name,
+            'pool': instance.pool.name,
+            'credit_header': instance.credit_header.id,
+            'credit_pos': CreditPositionSerializer(instance.credit_pos).data,
+            'old': self.get_old(instance)
+        }
+    
     def get_old(self, instance: Booking):
         if datetime.now().date() > instance.calendar.date:
             return True

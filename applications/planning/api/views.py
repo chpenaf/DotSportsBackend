@@ -27,7 +27,8 @@ from ..models import Calendar, Slot
 from .serializers import (
     CalendarSerializer, 
     PlanningDaySerializer,
-    SlotSerializer
+    SlotSerializer,
+    CalendarMemberSerializer
 )
 
 
@@ -335,6 +336,30 @@ class PlanningDayView(APIView):
             many=True
         )
         
+        return Response(
+            serializer.data,
+            status.HTTP_200_OK
+        )
+
+class SlotMemberView(APIView):
+
+    serializer_class = CalendarMemberSerializer
+    permission_classes = [ IsAuthenticated ]
+
+    def get(self, request: Request, id_location: int=None) -> Response:
+
+        today = datetime.now().date()
+        to_date = today + timedelta(weeks=2)
+
+        serializer = self.serializer_class(
+            Calendar.objects.all().filter(
+                location=Location.objects.all().filter(pk=id_location).first(),
+                date__gte=today,
+                date__lte=to_date
+            ),
+            many=True
+        )
+
         return Response(
             serializer.data,
             status.HTTP_200_OK

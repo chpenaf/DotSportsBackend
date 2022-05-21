@@ -100,3 +100,33 @@ class PlanningDaySerializer(serializers.ModelSerializer):
         )
 
         return serializer.data
+
+class SlotMemberSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model  = Slot
+        fields = [
+            'id',
+            'starttime',
+            'endtime'
+        ]
+
+class CalendarMemberSerializer(serializers.ModelSerializer):
+
+    slots = serializers.SerializerMethodField()
+
+    class Meta:
+
+        model  = Calendar
+        fields = [
+            'id',
+            'date',
+            'slots'
+        ]
+
+    def get_slots(self, instance: Calendar):
+        serializer = SlotMemberSerializer(
+            Slot.objects.all().filter(calendar=instance),
+            many=True
+        )
+        return serializer.data
