@@ -3,9 +3,6 @@ from django.db.models import QuerySet
 
 from rest_framework import status
 from rest_framework.decorators import api_view
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.request import Request
-from rest_framework.response import Response
 from rest_framework.generics import (
     ListAPIView,
     CreateAPIView,
@@ -13,6 +10,11 @@ from rest_framework.generics import (
     UpdateAPIView,
     DestroyAPIView
 )
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.request import Request
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
 from django_filters.rest_framework import DjangoFilterBackend
 
 from applications.members.api.serializers import (
@@ -23,6 +25,7 @@ from applications.members.api.serializers import (
 )
 
 from applications.members.models import Member
+from applications.users.models import User
 
 @api_view(['POST'])
 def signup_member(request: Request):
@@ -191,4 +194,36 @@ class CancelView(DestroyAPIView):
                     'ok':False,
                     'message':'Member Not Found'
                 }, status=status.HTTP_404_NOT_FOUND
+            )
+    
+class SelfInfoView(APIView):
+
+    serializer_class = RetrieveSerializer
+    permission_classes = [ IsAuthenticated ]
+
+    def get(self, request:Request):
+
+        if( request.user ):
+
+            user: User = request.user
+            
+            serializer = self.serializer_class(
+                Member.objects.all().filter(
+                    doc_num = user.doc_num
+                ).first(),
+                context={'request':request}
+            )
+
+            return Response(
+                serializer.data,
+                status.HTTP_200_OK
+            )
+
+        else:
+            return Response(
+                {
+                    'ok': False,
+                    'message': 'User not found'
+                },
+                status.HTTP_400_BAD_REQUEST
             )
