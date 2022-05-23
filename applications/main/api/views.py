@@ -14,6 +14,7 @@ from rest_framework.views import APIView
 from django_filters.rest_framework import DjangoFilterBackend
 
 from applications.users.models import User
+from applications.employees.models import Employee
 
 from ..models import Application
 from .serializers import AppsSerializer
@@ -171,3 +172,33 @@ class ApplicationAPIView(APIView):
                     'message':'Application not found'
                 }, status=status.HTTP_404_NOT_FOUND
             )
+
+
+class CheckPermissionAppView(APIView):
+
+    permission_classes = [ IsAuthenticated ]
+
+    def get(self, request: Request, app_name: str = None) -> Response:
+
+        user: User = request.user
+
+        employee: Employee = Employee.objects.all().filter(user=user).first()
+
+        app: Application = Application.objects.all().filter(name=app_name).first()
+
+        if app.admin and employee.job == 'AD':
+
+            return Response({
+                'ok':True
+            })
+
+        elif app.staff and employee.job == 'RE':
+
+            return Response({
+                'ok':True
+            })
+
+        else:
+            return Response({
+                'ok':False
+            })
