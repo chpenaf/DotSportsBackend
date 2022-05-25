@@ -228,6 +228,8 @@ class CalendarView(APIView):
 
 class SlotView(APIView):
 
+    permission_classes = [ IsAuthenticated ]
+
     def get(self, request, id_location=None, year=None, month=None, day=None, all=None):
         
         if id_location:
@@ -347,7 +349,7 @@ class SlotMemberView(APIView):
     permission_classes = [ IsAuthenticated ]
 
     def get(self, request: Request, id_location: int=None) -> Response:
-
+        
         today = datetime.now().date()
         to_date = today + timedelta(weeks=2)
 

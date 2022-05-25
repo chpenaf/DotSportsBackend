@@ -1,8 +1,10 @@
+from calendar import calendar
 from datetime import datetime
 
 from django.db.models import QuerySet
 
 from rest_framework import status
+from rest_framework.decorators import api_view
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -14,6 +16,7 @@ from applications.credits.models import Credit_Header, Credit_Pos
 from applications.locations.models import Location, Pool
 from applications.members.models import Member
 from applications.planning.models import Calendar, Slot
+from applications.users.models import User
 
 from ..models import Booking
 from .serializers import ( 
@@ -234,3 +237,60 @@ class BookingView(APIView):
                    'message': 'Error al eliminar reserva'
                 }, status.HTTP_400_BAD_REQUEST
             )
+
+@api_view(['GET'])
+def get_next_booking(request: Request) -> Response:
+
+    if request.method == 'GET':
+        
+        user: User = request.user
+
+        if not user:
+            return Response(
+                {
+                    'ok': False,
+                    'message': 'Not logged'
+                }, status.HTTP_401_UNAUTHORIZED
+            )
+        
+        member: Member = Member.objects.all().filter(
+                user = user
+            ).first()
+        
+        if not member:
+            return Response(
+                {
+                    'ok': False,
+                    'message': 'User not member'
+                }, status.HTTP_400_BAD_REQUEST
+            )
+        
+        bookings = Booking.objects.all().filter(
+                    member = member,
+            ).order_by('calendar','slot')
+
+        for item in bookings:
+            book: Booking = item
+            if ( book.slot.calendar.date == datetime.now().date() and 
+                 book.slot.starttime >= datetime.now().time() ):
+                break
+            
+            elif ( book.slot.calendar.date > datetime.now().date() ):
+                break
+
+        if not book:
+            return Response(
+                {
+                    'ok': False,
+                    'message': 'Not found bookings'
+                }, status.HTTP_404_NOT_FOUND
+            )
+        
+        serializer = BookingListSerializer(
+            book
+        )
+
+        return Response(
+            serializer.data,
+            status.HTTP_200_OK
+        )

@@ -28,3 +28,8 @@ class UserSerializer( serializers.ModelSerializer ):
 
     def get_full_name(self, user:User):
         return user.get_full_name()
+
+class PasswordSerializer( serializers.Serializer ):
+
+    current = serializers.CharField(max_length=255)
+    newpass = serializers.CharField(max_length=255)

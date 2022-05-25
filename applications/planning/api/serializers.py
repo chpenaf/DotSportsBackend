@@ -1,7 +1,10 @@
-from rest_framework import serializers
-from applications.courses.models import CourseAssigned, CourseSession
+from datetime import datetime
 
+from rest_framework import serializers
+
+from applications.courses.models import CourseAssigned, CourseSession
 from applications.locations.models import Pool, Lane
+
 from ..models import Calendar, Slot
 
 class CalendarSerializer(serializers.ModelSerializer):
@@ -125,8 +128,19 @@ class CalendarMemberSerializer(serializers.ModelSerializer):
         ]
 
     def get_slots(self, instance: Calendar):
+
+        if instance.date == datetime.now().date():
+            slots = Slot.objects.all().filter(
+                calendar = instance,
+                starttime__gte = datetime.now().time()
+            )
+        
+        else:
+            slots = Slot.objects.all().filter(
+                calendar = instance )
+
         serializer = SlotMemberSerializer(
-            Slot.objects.all().filter(calendar=instance),
+            slots,
             many=True
         )
         return serializer.data
