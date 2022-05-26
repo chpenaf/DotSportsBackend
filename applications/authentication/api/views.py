@@ -5,7 +5,6 @@ from django.contrib.sites.shortcuts import get_current_site
 from django.urls import reverse
 from django.utils.encoding import ( 
     smart_str, 
-    force_str, 
     smart_bytes, 
     DjangoUnicodeDecodeError 
     )
@@ -16,6 +15,7 @@ from django.utils.http import (
 from rest_framework import generics, status
 from rest_framework.response import Response
 
+from DotSports.settings.base import FRONTEND_URL
 from applications.utils import Util
 from applications.users.models import User
 from .serializers import (
@@ -81,7 +81,7 @@ class RequestPasswordResetEmail(generics.GenericAPIView):
                 request=request).domain
             relativeLink = reverse(
                 'password-reset-confirm', kwargs={'uidb64': uidb64, 'token': token})
-            redirect_url = request.data.get('redirect_url', os.environ.get('FRONTEND_URL', '') + 'auth/change-password' )
+            redirect_url = request.data.get('redirect_url', FRONTEND_URL + 'auth/change-password' )
             absurl = 'http://'+current_site + relativeLink
             email_body = 'Hola ' + user.get_short_name() + '! \nUsa el enlace de más abajo para restablecer tu contraseña  \n' + \
                 absurl+"?redirect_url="+redirect_url
@@ -106,12 +106,12 @@ class PasswordTokenCheckAPI(generics.GenericAPIView):
                 if len(redirect_url) > 3:
                     return CustomRedirect(redirect_url+'?token_valid=False')
                 else:
-                    return CustomRedirect(os.environ.get('FRONTEND_URL', '')+'?token_valid=False')
+                    return CustomRedirect(FRONTEND_URL+'?token_valid=False')
 
             if redirect_url and len(redirect_url) > 3:
                 return CustomRedirect(redirect_url+'?token_valid=True&message=Credentials Valid&uidb64='+uidb64+'&token='+token)
             else:
-                return CustomRedirect(os.environ.get('FRONTEND_URL', '')+'?token_valid=False')
+                return CustomRedirect(FRONTEND_URL+'?token_valid=False')
 
         except DjangoUnicodeDecodeError as identifier:
             try:

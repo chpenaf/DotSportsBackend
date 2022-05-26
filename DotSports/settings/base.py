@@ -139,6 +139,8 @@ SIMPLE_JWT = {
 # Internationalization
 # https://docs.djangoproject.com/en/4.0/topics/i18n/
 
+FRONTEND_URL = os.environ.get('FRONTEND_URL','')
+
 LANGUAGE_CODE = 'es-CL'
 
 TIME_ZONE = 'America/Santiago'
