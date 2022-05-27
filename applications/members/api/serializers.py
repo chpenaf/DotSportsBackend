@@ -57,7 +57,8 @@ class ListSerializer(serializers.ModelSerializer):
             'full_name',
             'age',
             'email',
-            'status'
+            'status',
+            'user'
         ]
     
     def get_avatar(self, member: Member) -> str:

@@ -269,21 +269,26 @@ def get_next_booking(request: Request) -> Response:
                     member = member,
             ).order_by('calendar','slot')
 
+        found = False
+
         for item in bookings:
             book: Booking = item
             if ( book.slot.calendar.date == datetime.now().date() and 
                  book.slot.starttime >= datetime.now().time() ):
+                found = True
                 break
             
             elif ( book.slot.calendar.date > datetime.now().date() ):
+                found = True
                 break
+    
 
-        if not book:
+        if not found:
             return Response(
                 {
                     'ok': False,
                     'message': 'Not found bookings'
-                }, status.HTTP_404_NOT_FOUND
+                }, status.HTTP_200_OK
             )
         
         serializer = BookingListSerializer(
