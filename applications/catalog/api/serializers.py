@@ -53,7 +53,7 @@ class CourseLevelSerializer(serializers.ModelSerializer):
 
 class CourseSerializer(serializers.ModelSerializer):
 
-    levels = serializers.SerializerMethodField()
+    levels = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model  = Course
