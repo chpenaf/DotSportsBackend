@@ -6,6 +6,10 @@ from applications.credits.api.serializers import (
     CreditPositionSerializer
 )
 
+from applications.members.api.serializers import (
+    RetrieveSerializer
+)
+
 from applications.planning.api.serializers import (
     SlotSerializer
 )
@@ -58,3 +62,14 @@ class BookingListSerializer(serializers.ModelSerializer):
             return True
         else:
             return False
+
+class MemberBySlotSerializer(serializers.ModelSerializer):
+
+    member = RetrieveSerializer()
+
+    class Meta:
+        model  = Booking
+        fields = [
+            'id',
+            'member'
+        ]

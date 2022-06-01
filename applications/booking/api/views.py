@@ -21,7 +21,8 @@ from applications.users.models import User
 from ..models import Booking
 from .serializers import ( 
     BookingSerializer,
-    BookingListSerializer
+    BookingListSerializer,
+    MemberBySlotSerializer
 )
 
 class BookingView(APIView):
@@ -293,6 +294,24 @@ def get_next_booking(request: Request) -> Response:
         
         serializer = BookingListSerializer(
             book
+        )
+
+        return Response(
+            serializer.data,
+            status.HTTP_200_OK
+        )
+
+@api_view(['GET'])
+def get_booking_slot(request: Request, pk: int = None) -> Response:
+
+    if request.method == 'GET':
+
+        serializer = MemberBySlotSerializer(
+            Booking.objects.all().filter(
+                slot = Slot.objects.all().filter( id = pk ).first()
+            ),
+            context={'request':request},
+            many=True
         )
 
         return Response(

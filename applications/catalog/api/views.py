@@ -167,14 +167,43 @@ class CourseView(APIView):
     serializer_class = CourseSerializer
     permission_classes = [ IsAuthenticated ]
 
-    def post(self, request: Request) -> Response:
+    def post(self, request: Request, id_location: int = None) -> Response:
 
         serializer = self.serializer_class(
             data=request.data
         )
 
+        location: Location = Location.objects.all().filter( id = id_location ).first()
+        
+        if not location:
+            return Response(
+                {
+                    'ok': False,
+                    'message': 'Location not found'
+                },
+                status.HTTP_400_BAD_REQUEST
+            )
+
+        catalog: Catalog = Catalog.objects.all().filter(
+                location = location
+            ).first()
+
+        if not catalog:
+            return Response(
+                {
+                    'ok': False,
+                    'message': 'Catalog not found'
+                },
+                status.HTTP_400_BAD_REQUEST
+            )
+
         if serializer.is_valid():
             serializer.save()
+
+            course: Course = serializer.instance
+            catalog.courses.add(course)
+            catalog.save()
+
             return Response(
                 serializer.data,
                 status.HTTP_200_OK
@@ -185,11 +214,164 @@ class CourseView(APIView):
                 serializer.errors,
                 status.HTTP_400_BAD_REQUEST
             )
+
+    def put(self, request: Request) -> Response:
         
+        pk = request.data.get('id')
+
+        if pk:
+            instance = Course.objects.all().filter( id = pk ).first()
+
+        if not instance:
+            return Response(
+                {
+                    'ok': False,
+                    'message': 'Course not found'
+                },
+                status.HTTP_404_NOT_FOUND
+            )
+        
+        serializer = self.serializer_class(
+            instance=instance,
+            data=request.data
+        )
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(
+                serializer.data,
+                status.HTTP_200_OK
+            )
+
+        else:
+            return Response(
+                serializer.errors,
+                status.HTTP_400_BAD_REQUEST
+            )
+    
+    def delete(self, request:Request, pk:int = None ) -> Response:
+
+        if pk:
+            instance = Course.objects.all().filter( id = pk ).first()
+
+        if instance:
+
+            instance.delete()
+            return Response(
+                {
+                    'ok': True,
+                    'message': 'Course deleted'
+                },
+                status.HTTP_200_OK
+            )
+
+        else:
+            return Response(
+                {
+                    'ok': False,
+                    'message': 'Course not found'
+                },
+                status.HTTP_404_NOT_FOUND
+            )
+        
+
+
+        
+
+class LevelView(APIView):
+
+    serializer_class = CourseLevelSerializer
+    permission_classes = [ IsAuthenticated ]
+
+    def post(self, request: Request):
+
+        instances = list()
+
+        for item in request.data:
+
+            if item.get('id'):
+
+                level: Course_Level = Course_Level.objects.all().filter(
+                    id = item.get('id')
+                ).first()
+
+                serializer = self.serializer_class(
+                    instance=level,
+                    data=item
+                )
+
+                if serializer.is_valid():
+                    serializer.save()
+                    instances.append(serializer.instance)
+                else:
+                    return Response(
+                        serializer.errors,
+                        status.HTTP_400_BAD_REQUEST
+                    )
+            
+            else:
+
+                serializer = self.serializer_class(
+                    data=item
+                )
+
+                if serializer.is_valid():
+                    serializer.save()
+                    instances.append(serializer.instance)
+                else:
+                    return Response(
+                        serializer.errors,
+                        status.HTTP_400_BAD_REQUEST
+                    )
+        
+        if instances:
+
+            serializer = self.serializer_class(
+                instance=instances,
+                many=True
+            )
+
+            return Response(
+                serializer.data,
+                status.HTTP_200_OK
+            )
+
+        else:
+            return Response(
+                {
+                    'ok': False,
+                    'message': 'Nothing happened'
+                }, status.HTTP_400_BAD_REQUEST
+            )
+            
+
+            
+    
+    def delete(self, request: Request, pk: int=None):
+
+        level: Course_Level = Course_Level.objects.all().filter( pk = pk ).first()
+
+        if level:
+            level.delete()
+            return Response(
+                {
+                    'ok': True,
+                    'message': 'Borrado correctamente'
+                }, status.HTTP_200_OK
+            )
+        
+        else:
+            return Response(
+                {
+                    'ok': False,
+                    'message': 'Nivel no encontrado'
+                }, status.HTTP_400_BAD_REQUEST
+            )
 
 class CatalogView(APIView):
 
     serializer_class = CatalogSerializer
+    permission_classes = [ IsAuthenticated ]
 
     def get_queryset(self, id_location:int=None) -> QuerySet:
         if id_location:
