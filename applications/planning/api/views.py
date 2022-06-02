@@ -331,7 +331,7 @@ class PlanningDayView(APIView):
         slots = Slot.objects.all().filter(
                     calendar=calendar
                 )
-        
+
         serializer = self.serializer_class(
             instance=slots,
             context={'pool':pool},

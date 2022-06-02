@@ -14,6 +14,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from applications.locations.models import Location
+from applications.planning.api.views import CalendarView
 from applications.planning.models import Calendar
 from ..models import (
     Schedule,
@@ -367,7 +368,7 @@ class ScheduleView(APIView):
                     slot.save()
                     index_slot += 1
         
-        Calendar.fill_calendar(location,begin_validity,end_validity)
+        CalendarView.fill_calendar(location,begin_validity,end_validity)
 
         return Response({
             'ok':True

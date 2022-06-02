@@ -54,27 +54,25 @@ class PlanningLaneSerializer(serializers.ModelSerializer):
     def get_desc(self, instance: Lane):
         slot: Slot = self.context.get('slot')
 
-        course_assigned: CourseAssigned = CourseAssigned.objects.filter(
-            lane=instance
-        ).first()
+        sessions = CourseSession.objects.all().filter(
+            slot = slot
+        )
 
-        if course_assigned:
+        found = False
 
-            session: CourseSession = CourseSession.objects.filter(
-                course_assigned=course_assigned,
-                slot=slot
-            ).first()
+        for session in sessions:
+            if session.course_assigned.lane == instance:
+                found = True
+                break
 
-            if session:
-                return '{0} {1}'.format(
-                    session.course_assigned.course.name,
-                    session.course_assigned.level.name
-                )
-            else:
-                return 'Nado Libre'
-        
+        if found:
+            return '{0} {1}'.format(
+                session.course_assigned.course.name,
+                session.course_assigned.level.name
+                    )
         else:
             return 'Nado Libre'
+
 
 
 class PlanningDaySerializer(serializers.ModelSerializer):
@@ -98,7 +96,9 @@ class PlanningDaySerializer(serializers.ModelSerializer):
 
         serializer = PlanningLaneSerializer(
             Lane.objects.all().filter( id_pool = pool ),
-            context={'slot': instance},
+            context={
+                'slot': instance
+            },
             many=True
         )
 
